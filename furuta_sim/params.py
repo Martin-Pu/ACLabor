@@ -28,10 +28,14 @@ mu_H1 = 93.58e-3            # N*m
 mu_V2 = 1.332e-5            # N*m*s
 mu_H2 = 3.018e-4            # N*m
 
+# Epsilon für Reibungsmodel
+epsilon = 0.01
+
 # Aktuatorgrenzen
 tau_max = 4.0               # N*m
 
+#Berechnete Werte aus Aufgabe 3.2
 m2 = mP + mS
 J0_hat = J1_hat + m2*lP
-J2_hat = 1/3*mS*L2**2 + mP*lP**2
 l2 = L2/2 # für pendelmasse mP = 0
+J2_hat = 1/12*mS*L2**2 + ms*l2**2 + mP*lP**2
