@@ -11,10 +11,10 @@ def stepOnOff(t_on = 0.4, t_off = 0.5, u_on = 10):
 def u_validation(t):
     if 0 < t and t < 1:
         return 0.62*t
-    if t<=1.4:
+    if 1 <= t and t<=1.4:
         return -4.12*t + 4.74
-    if t<2:
-        1.72*t - 3.43
+    if 1.4 < t and t<2:
+        return 1.72*t - 3.43
     return 0
         
 
