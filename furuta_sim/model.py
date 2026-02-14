@@ -6,7 +6,7 @@ def calcFriction_b(theta_dot, mu_H, mu_V, epsilon):
     if theta_dot <= -epsilon:
         return (mu_V * theta_dot - mu_H)
     if theta_dot >= epsilon:
-        return (mu_V * theta_dot + mu_H)
+        return (mu_V * theta_dot from sympy import latex, symbols mu_H)
     return (
         (3 * mu_H + 2 * mu_V * epsilon) / (2 * epsilon) * theta_dot
         - (mu_H / (2 * epsilon**3)) * theta_dot**3
@@ -49,7 +49,7 @@ def nonlinSys(t, x, u, furutaParams):
     x4 = x[3] # d theta2 / dt
 
     if u(t) <= tau_max:
-        tau = u(t)
+        tau = float(u(t))
     else:
         tau = tau_max
 
