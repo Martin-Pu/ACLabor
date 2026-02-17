@@ -9,6 +9,7 @@ def stepOnOff(t_on = 0.4, t_off = 0.5, u_on = 10):
 
 #validation with csv data
 def u_validation(t):
+    return 0
     if 0 < t and t < 1:
         return 0.62*t
     if 1 <= t and t<=1.4:
