@@ -77,11 +77,29 @@ def make_non_linear_furuta_accel_expr(
 
     return (th1dd, th2dd)
 
-def make_furuta_accel_lambdas(accel_exprs):
+def get_non_linear_furuta_system(params):
     """
     Lambdifys sympy expressions with the symbols th1, th1d, th2, th2d and tau
     """
-    return sp.lambdify((th1, th1d, th2, th2d, tau), accel_exprs, modules="numpy")
+
+    # non linear expressions
+    th1dd_expr, th2dd_expr = make_non_linear_furuta_accel_expr(
+        params,
+        simplify_expr=False,   # wenn's beim Start zu lange dauert -> False
+    )
+    
+    th1dd_lambda = sp.lambdify((th1, th1d, th2, th2d, tau), th1dd_expr, modules="numpy")
+    th2dd_lambda = sp.lambdify((th1, th1d, th2, th2d, tau), th2dd_expr, modules="numpy")
+
+    def non_linear_sys(t, x, u):
+        x1, x2, x3, x4 = x
+        x1d = x2
+        x2d = th1dd_lambda(x1, x2, x3, x4, u)
+        x3d = x4
+        x4d = th2dd_lambda(x1, x2, x3, x4, u)
+        return float(x1d), float(x2d), float(x3d), float(x4d)
+
+    return non_linear_sys
 
 def get_linear_furuta(params, th1_op, th1d_op, th2_op, th2d_op, tau_op):
     """
