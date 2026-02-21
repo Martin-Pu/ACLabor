@@ -101,10 +101,13 @@ def get_non_linear_furuta_system(params):
 
     return non_linear_sys
 
-def get_linear_furuta(params, th1_op, th1d_op, th2_op, th2d_op, tau_op):
+def get_linear_furuta(params, operating_point):
     """
-    Returns A Matrix and b Vektor for a specified operating point (as Sympy objekts)
+    Returns A Matrix and b Vektor for a specified operating point
+    ordered like: (th1_op, th1d_op, th2_op, th2d_op, tau_op)
     """
+    th1_op, th1d_op, th2_op, th2d_op, tau_op = operating_point
+    
     th1dd_expr, th2dd_expr = make_non_linear_furuta_accel_expr(
         params,
         simplify_expr=False,   # wenn's beim Start zu lange dauert -> False
@@ -125,4 +128,62 @@ def get_linear_furuta(params, th1_op, th1d_op, th2_op, th2d_op, tau_op):
     A_lin = A.subs({th1:th1_op, th1d:th1d_op, th2:th2_op, th2d:th2d_op, tau:tau_op})
     b_lin = b.subs({th1:th1_op, th1d:th1d_op, th2:th2_op, th2d:th2d_op, tau:tau_op})
 
-    return A_lin, b_lin
+    A_np = np.array(A_lin.tolist(), dtype=float)
+    b_np = np.array(b_lin.tolist(), dtype=float)
+
+    return A_np, b_np
+
+
+def get_RNF_furuta(params, operating_point):
+    """
+    Returns A_RNF and Q Matrix and  for a specified operating point
+    """
+    A, b = get_linear_furuta(params, operating_point)
+
+    n = A.shape[0]
+    
+    # Steuerbarkeitsmatrix S = [B, AB, A^2B, ...]
+    S_blocks = [np.linalg.matrix_power(A, k) @ b for k in range(n)] #liste von spalten vektoren
+    S = np.hstack(S_blocks) #spaletenvektoren werden zu matrix zusammen gefügt
+    S_inv = np.linalg.inv(S)
+
+    q1T = S_inv[-1, :].reshape(1, -1) #reshape to explicitly make it a row vector
+
+    Q_blocks = [q1T @ np.linalg.matrix_power(A, k)for k in range(n)] #liste von zeilen vektoren
+    Q = np.vstack(Q_blocks)
+    Q_inv = np.linalg.inv(Q)
+
+    tol = 1e-13   # wählbar, z.B. 1e-12, 1e-9, je nach Skalierung
+
+    A_RNF = Q @ A @ Q_inv
+    A_RNF[np.abs(A_RNF) < tol] = 0.0
+
+    return A_RNF, Q
+
+def get_a_coefficients_furuta(params, operating_point):
+    """
+    Returns the a coefficients of the system for a specified operating point
+    """
+    A_RNF, Q = get_RNF_furuta(params, operating_point)
+    a0, a1, a2, a3 = -A_RNF[-1]
+    return a0, a1, a2, a3
+
+def get_b_coefficients_furuta(cT, params, operating_point):
+    """
+    Returns the b coefficients of the system for a specified operating point
+    and a specified output vector cT
+    """
+    A_RNF, Q = get_RNF_furuta(params, operating_point)
+    Q_inv = np.linalg.inv(Q)
+    
+    cT = cT[-1, :].reshape(1, -1) #reshape to explicitly make it a row vector
+
+    cT_RNF = (cT @ Q_inv)
+    b0, b1, b2, b3 = cT_RNF[0]
+
+    return b0, b1, b2, b3
+
+
+
+    
+    
