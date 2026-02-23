@@ -45,7 +45,10 @@ def generate_trajectorys(eta_t0, eta_t1, t0, t1, params, operating_point):
         + a1 * eta_d1_ref(t)
         + a0 * eta_ref(t)
     )
+
+    op = operating_point
+    x_op = np.array([op[0], op[1], op[2], op[3]])
     
-    x_ref = lambda t: Q_inv @ np.array([eta_ref(t), eta_d1_ref(t), eta_d2_ref(t), eta_d3_ref(t)])
+    x_ref = lambda t: x_op + Q_inv @ np.array([eta_ref(t), eta_d1_ref(t), eta_d2_ref(t), eta_d3_ref(t)])
 
     return u_ref, x_ref
