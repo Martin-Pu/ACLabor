@@ -90,9 +90,9 @@ class FurutaParams:
         self.m2 = self._mS + self._mP
         self.J0_hat = self._J1_hat + self.m2 * self._L1**2
 
-        self.l2 = self._L2 / 2.0
+        self.l2 = ( (self._L2 / 2.0) * self._mS + self._lP * self._mP) / self.m2
         self.J2_hat = (
             (1 / 12) * self._mS * self._L2**2
-            + self._mS * self.l2**2
+            + self._mS * (self.L2/2.0)**2
             + self._mP * self._lP**2
         )
